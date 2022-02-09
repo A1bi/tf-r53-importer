@@ -23,9 +23,14 @@ const workingDir = "/path/to/workingdir"
 var sess *session.Session
 var client *route53.Route53
 
-func main() {
-	initialize()
+func init() {
+	sess = session.Must(session.NewSession())
+	client = route53.New(sess)
 
+	os.Chdir(fmt.Sprintf("%s/pages_%d", workingDir, albNumber))
+}
+
+func main() {
 	for _, zoneName := range zones {
 		zone := findZone(&zoneName)
 		if zone == nil {
@@ -42,13 +47,6 @@ func main() {
 		findAndImportRecord(zoneName, zoneId, "www", "www_aaaa", "AAAA")
 		findAndImportRecord(zoneName, zoneId, "www", "www_a", "A")
 	}
-}
-
-func initialize() {
-	sess = session.Must(session.NewSession())
-	client = route53.New(sess)
-
-	os.Chdir(fmt.Sprintf("%s/pages_%d", workingDir, albNumber))
 }
 
 func findZone(name *string) *route53.HostedZone {
